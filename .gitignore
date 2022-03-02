@@ -11,6 +11,10 @@
 # production
 /build
 
+# template redux
+/src/app
+/src/features
+
 # misc
 .DS_Store
 .env.local
