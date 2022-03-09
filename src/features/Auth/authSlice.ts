@@ -5,8 +5,8 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { RootState } from "../../app/store";
 
 const firebaseConfiguration = {
-        apiKey: "AIzaSyADJ5fZBpmlXH47BkMpyYEsq0RxU-Ft_14 ",
-        authDomain: "salesmanager-54a41.firebaseapp.com",
+        apiKey: process.env.REACT_APP_FIREBASE_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_DOMAIN,
         // The value of `databaseURL` depends on the location of the database
         // databaseURL: "https://DATABASE_NAME.firebaseio.com",
         projectId: "PROJECT_ID",
