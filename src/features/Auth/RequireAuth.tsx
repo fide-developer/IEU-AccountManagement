@@ -1,6 +1,6 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { useEffect } from "react"
-import { Navigate, useLocation } from "react-router-dom"
+import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { app } from "../../api/firebase/initialize.firebase"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { authSelector, checkLogin } from "./authSlice"
@@ -34,7 +34,7 @@ const RequireAuth: React.FC = () => {
     if(user)
     return(
         <>
-            here we go again
+            <Outlet />
         </>
     )
     
