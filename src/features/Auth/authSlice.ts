@@ -1,27 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AuthTypes, LoginDataTypes } from "./type";
-import { initializeApp } from "@firebase/app"
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { RootState } from "../../app/store";
-
-const firebaseConfiguration = {
-        apiKey: process.env.REACT_APP_FIREBASE_KEY,
-        authDomain: process.env.REACT_APP_FIREBASE_DOMAIN,
-        // The value of `databaseURL` depends on the location of the database
-        // databaseURL: "https://DATABASE_NAME.firebaseio.com",
-        projectId: "PROJECT_ID",
-        // storageBucket: "PROJECT_ID.appspot.com",
-        // messagingSenderId: "SENDER_ID",
-        // appId: "APP_ID",
-        // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-        // measurementId: "G-MEASUREMENT_ID",
-
-}
-
-const app = initializeApp(firebaseConfiguration)
+import { AuthTypes, LoginDataTypes, UserTypes } from "./type";
+import { AppThunk, RootState } from "../../app/store";
+import { getRole, getUser, loginFirebase, logoutFirebase } from "../../api/firebase/auth.firebase";
 
 const initialState: AuthTypes = {
-    loading: false
+    loading: true
 }
 
 
@@ -29,39 +12,35 @@ const initialState: AuthTypes = {
 export const getUsers = createAsyncThunk(
     "auth/getUsers",
     async () => {
-        let auth = await getAuth(app)
+        let auth = await getUser()
 
-        return auth.currentUser
+        return auth
     }
 )
 
 export const login = createAsyncThunk(
     "auth/login",
-    async (data: LoginDataTypes, {rejectWithValue}) => {
-        const auth = await getAuth(app)
+    async (data: LoginDataTypes,_thunkAPI) => {
+        const tryLogin = await loginFirebase(data,_thunkAPI.rejectWithValue)
+        if(tryLogin.uid) _thunkAPI.dispatch(loginRoles(tryLogin.uid))
         
-        const loginFirebase = await signInWithEmailAndPassword(auth, data.username, data.password)
-            .then((userCredential) => {
-                return userCredential.user
-            })
-            .catch((error) => {
-                return rejectWithValue(error.code)
-            })
-            
-        return loginFirebase
+        return tryLogin
+    }
+)
+
+//thunk process to get user role from firestore (firebase)
+const loginRoles = createAsyncThunk(
+    "auth/role",
+    async (id: string, {rejectWithValue}) => {
+        const roles =  await getRole(id, rejectWithValue)
+        return roles
     }
 )
 
 export const logout = createAsyncThunk(
     'auth/logout',
     async () => {
-        let auth = getAuth(app)
-
-        let trySignOUt = await signOut(auth).then(()=>{
-            return 'success'
-        }).catch(error => {
-            return error
-        })
+        let trySignOUt = await logoutFirebase()
         
         return trySignOUt
     }
@@ -71,20 +50,21 @@ export const authSlice = createSlice(
         name: "auth",
         initialState,
         reducers: {
-            
+            changeUserState: (state, action : PayloadAction<UserTypes>) => {
+                state.user = action.payload
+            }
         },
         extraReducers: (builder) => {
             builder
             .addCase(getUsers.pending, (state) => {
                 state.loading = true
             })
-            .addCase(getUsers.fulfilled, (state, action) => {
+            .addCase(getUsers.fulfilled, (state, action : PayloadAction<any>) => {
                 state.loading = false
-                state.user = action.payload
+                state.user = {uid: action.payload.uid, email: action.payload.email}
             })
             .addCase(login.fulfilled, (state, action) => {
-                state.loading = false
-                state.user = action.payload
+                state.user = {uid: action.payload.uid, email: action.payload.email}
             })
             .addCase(login.pending, (state) => {
                 state.loading = true
@@ -100,6 +80,13 @@ export const authSlice = createSlice(
                         state.errorMessage = "Login failed! please check your email and password!"
                         break;
                 }
+            })
+            .addCase(loginRoles.fulfilled, (state, action) => {
+                state.loading = false
+                state.user = {...state.user, role: action.payload.role, name: action.payload.name}
+            })
+            .addCase(loginRoles.rejected, (state, action) => {
+                state.loading = false
             })
             .addCase(logout.fulfilled, (state, action) => {
                 state.loading = false
@@ -117,6 +104,12 @@ export const authSlice = createSlice(
     }
 )
 
-export const selectAuth = (state: RootState) => state.auth;
+const {changeUserState} = authSlice.actions 
+
+export const checkLogin = (user : UserTypes): AppThunk => (dispatch) => {
+    dispatch(changeUserState(user))
+    dispatch(loginRoles(user.uid))
+}
+export const authSelector = (state: RootState) => state.auth;
 
 export default authSlice.reducer

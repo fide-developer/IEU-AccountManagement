@@ -1,17 +1,32 @@
+import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { useEffect } from "react"
 import { Navigate, useLocation } from "react-router-dom"
+import { app } from "../../api/firebase/initialize.firebase"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { getUsers, selectAuth } from "./authSlice"
-
+import { authSelector, checkLogin } from "./authSlice"
+import { UserTypes } from "./type"
 
 const RequireAuth: React.FC = () => {
     const location = useLocation()
+    const auth = useAppSelector(authSelector)
     const dispatch = useAppDispatch()
-    const auth = useAppSelector(selectAuth)
     const user = auth.user
 
-    useEffect(() => {
-        dispatch(getUsers())
+    useEffect(()=> {
+        const authListener = onAuthStateChanged(getAuth(app), user => {
+
+            if(user) {
+                let users: UserTypes = {
+                    email : user.email,
+                    name: "",
+                    uid: user.uid
+                }
+                dispatch(checkLogin(users))
+            }
+
+        })
+
+        return authListener
     },[])
 
     if(auth.loading) return <>Loading</>

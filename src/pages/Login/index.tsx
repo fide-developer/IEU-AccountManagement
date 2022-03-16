@@ -1,23 +1,47 @@
-import { getAuth } from "firebase/auth"
-import { useState } from "react"
-import { useAppDispatch } from "../../app/hooks"
+import { onAuthStateChanged, getAuth } from "firebase/auth"
+import { useEffect, useState } from "react"
+import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import { app } from "../../api/firebase/initialize.firebase"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { ButtonGroup, MainButton, TextButton } from "../../components/Button"
 import Form, { useForm } from "../../components/Form"
 import StrictInput from "../../components/Form/StrictInput"
 import Logo from "../../components/Logo/Logo"
-import { login } from "../../features/Auth/authSlice"
+import { authSelector, checkLogin, login } from "../../features/Auth/authSlice"
+import { UserTypes } from "../../features/Auth/type"
 import { LoginContent, LoginPageContainer, LoginSection, Messages } from "./styledComponents"
 
+type locationType = {
+    from: { pathname: string }
+}
 
 const LoginPage: React.FC = () => {
-    const auth = getAuth()
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const formError = useForm()
+    
+    const user = useAppSelector(authSelector).user
     const dispatch = useAppDispatch()
 
+    const location = useLocation()
+    
+    
+    useEffect(()=> {
+        const authListener = onAuthStateChanged(getAuth(app), user => {
 
-    let user = auth.currentUser
+            if(user) {
+                let users: UserTypes = {
+                    email : user.email,
+                    name: "",
+                    uid: user.uid
+                }
+                dispatch(checkLogin(users))
+            }
+
+        })
+
+        return authListener
+    }, [])
 
     //check the error before fire the login function on Redux
     const loginAction = () => {
@@ -25,7 +49,8 @@ const LoginPage: React.FC = () => {
         
         dispatch(login({username: email, password: password}))
     }
-
+   
+    if(user && !user.uid && !user.loading)
     return (
         <LoginPageContainer>
             <LoginContent>
@@ -48,6 +73,26 @@ const LoginPage: React.FC = () => {
             </LoginSection>
         </LoginPageContainer>
     )
+
+    //prepare from state
+    let locationState = location.state as locationType
+    let from = "/"
+    if(locationState && 
+        locationState.from && 
+        locationState.from.pathname && 
+        locationState.from.pathname != "/login") {
+            from = locationState.from.pathname
+    }
+    if(user && user.uid && !user.loading)
+    return(
+        <Navigate to={from} replace/>
+    )
+
+    return <>Loading login . . .</>
 }
 
 export default LoginPage
+
+function selectorAuth(selectorAuth: any) {
+    throw new Error("Function not implemented.")
+}
