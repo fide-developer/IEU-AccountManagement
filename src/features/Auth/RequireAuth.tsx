@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import { Navigate, Outlet, useLocation } from "react-router-dom"
 import { app } from "../../api/firebase/initialize.firebase"
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { authSelector, checkLogin } from "./authSlice"
+import { authSelector, checkLogin, setLoading } from "./authSlice"
 import { UserTypes } from "./type"
 
 const RequireAuth: React.FC = () => {
@@ -21,8 +21,10 @@ const RequireAuth: React.FC = () => {
                     name: "",
                     uid: user.uid
                 }
-                dispatch(checkLogin(users))
+                return dispatch(checkLogin(users))
             }
+
+            return dispatch(setLoading(false))
 
         })
 

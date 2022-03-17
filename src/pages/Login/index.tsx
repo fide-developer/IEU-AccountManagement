@@ -7,7 +7,7 @@ import { ButtonGroup, MainButton, TextButton } from "../../components/Button"
 import Form, { useForm } from "../../components/Form"
 import StrictInput from "../../components/Form/StrictInput"
 import Logo from "../../components/Logo/Logo"
-import { authSelector, checkLogin, login } from "../../features/Auth/authSlice"
+import { authSelector, checkLogin, login, setLoading } from "../../features/Auth/authSlice"
 import { UserTypes } from "../../features/Auth/type"
 import { LoginContent, LoginPageContainer, LoginSection, Messages } from "./styledComponents"
 
@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState<string>("")
     const formError = useForm()
     
-    const user = useAppSelector(authSelector).user
+    const user = useAppSelector(authSelector)
     const dispatch = useAppDispatch()
 
     const location = useLocation()
@@ -35,9 +35,9 @@ const LoginPage: React.FC = () => {
                     name: "",
                     uid: user.uid
                 }
-                dispatch(checkLogin(users))
+                return dispatch(checkLogin(users))
             }
-
+            return dispatch(setLoading(false))
         })
 
         return authListener
@@ -49,8 +49,8 @@ const LoginPage: React.FC = () => {
         
         dispatch(login({username: email, password: password}))
     }
-   
-    if(user && !user.uid && !user.loading)
+    console.log(user)
+    if(user && !user.user && !user.loading)
     return (
         <LoginPageContainer>
             <LoginContent>
@@ -83,7 +83,7 @@ const LoginPage: React.FC = () => {
         locationState.from.pathname != "/login") {
             from = locationState.from.pathname
     }
-    if(user && user.uid && !user.loading)
+    if(user && user.user && !user.loading)
     return(
         <Navigate to={from} replace/>
     )

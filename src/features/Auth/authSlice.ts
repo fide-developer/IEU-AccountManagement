@@ -52,6 +52,9 @@ export const authSlice = createSlice(
         reducers: {
             changeUserState: (state, action : PayloadAction<UserTypes>) => {
                 state.user = action.payload
+            },
+            setLoading: (state,action: PayloadAction<boolean>) =>{
+                state.loading = action.payload
             }
         },
         extraReducers: (builder) => {
@@ -105,6 +108,7 @@ export const authSlice = createSlice(
 )
 
 const {changeUserState} = authSlice.actions 
+export const {setLoading} = authSlice.actions 
 
 export const checkLogin = (user : UserTypes): AppThunk => (dispatch) => {
     dispatch(changeUserState(user))

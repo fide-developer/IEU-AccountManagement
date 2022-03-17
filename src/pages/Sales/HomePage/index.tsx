@@ -1,10 +1,11 @@
+import ListAccount from "./ListAccount"
 
 
 const SalesHomePage: React.FC = () => {
 
     return(
         <>
-         Sales Page actually
+            <ListAccount />
         </>
     )
 }

@@ -34,3 +34,35 @@ export const UserMenuTitle = styled.div`
         }
     }
 `
+
+export const UserMenuDrowdown = styled.div<{active:boolean}>`
+    display: ${props => props.active? "flex" : "none"};
+    flex-flow: column nowrap;
+
+    position: absolute;
+
+    top: 100%;
+    right: 0;
+
+    width: 150%;
+    padding: 16px 0 8px 0;
+
+    background: rgba(0,0,0,.9);
+    gap: 4px;
+
+`
+
+export const UserMenu = styled.div`
+    width: 100%;
+    text-align: left;
+    color: white;
+    padding: 8px 16px;
+    background: none;
+    cursor: pointer;
+    transition: background-color .5s ease-in-out, color .25s ease-in-out;
+
+    :hover{
+        background-color: rgba(0,0,0,.7);
+        color: #27AAE1;
+    }
+`
