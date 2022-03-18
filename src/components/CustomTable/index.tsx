@@ -1,23 +1,29 @@
 import { TableContainer } from "./styledComponent"
 
 
-const CustomTable: React.FC = () => {
+const CustomTable: React.FC<{data:any[], title:string[]}> = ({title, data}) => {
 
     return(
         <TableContainer>
             <thead>
                 <tr>
-                    <th>
-                        test doang ini nih
-                    </th>
+                    {title? title.map(data => <th>{data}</th>) : ""}
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        test doang ini nih
-                    </td>
-                </tr>
+                {data? data.map((data) => {
+                    let col = []
+                    for(const props in data){
+                        col.push(data[props])
+                    }
+                    return(
+                        <tr>
+                            {
+                                col.map(item=> <td>{item}</td>)
+                            }
+                        </tr>
+                    )
+                }):""}
             </tbody>
         </TableContainer>
     )

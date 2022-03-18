@@ -6,6 +6,39 @@ import CustomTable from "../../../../components/CustomTable"
 
 
 const ListAccount: React.FC = () => {
+    const title = ["Name", "Province", "City", "Type", "Product", "Status", "RM/Sales", "OPIC"]
+    const data = [
+        {
+            name: "Budi Kasih",
+            province: "DKI Jakarta",
+            city: "Jakarta Selatan",
+            type: "Coorporate",
+            product: "1:G/1:H",
+            status: "Cold / Hot Prospect",
+            sales: "APM",
+            OPIC: "ALK"
+        },
+        {
+            name: "Budi Kasih 2",
+            province: "DKI Jakarta",
+            city: "Jakarta Selatan",
+            type: "Coorporate",
+            product: "1:G/1:H",
+            status: "Cold / Hot Prospect",
+            sales: "APM",
+            OPIC: "ALK"
+        },
+        {
+            name: "Budi Kasih 3",
+            province: "DKI Jakarta",
+            city: "Jakarta Selatan",
+            type: "Coorporate",
+            product: "1:G/1:H",
+            status: "Cold / Hot Prospect",
+            sales: "APM",
+            OPIC: "ALK"
+        }
+    ]
 
     return(
         <ListAccountContainer>
@@ -19,7 +52,7 @@ const ListAccount: React.FC = () => {
                 <MainButton>Add New Account</MainButton>
             </ListMenuContainer>
 
-            <CustomTable />
+            <CustomTable title={title} data={data}/>
         </ListAccountContainer>
     )
 }
